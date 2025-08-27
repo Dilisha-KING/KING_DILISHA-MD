@@ -1,6 +1,6 @@
 const { cmd } = require('../command');
 const { SinhalaSub } = require('@sl-code-lords/movie-api');
-const { SinhalaSubDL } = require('sinhalasub.lk');
+const { PixaldrainDL } = require('pixaldrain-sinhalasub');
 
 cmd({
     pattern: 'sinhalasub',
