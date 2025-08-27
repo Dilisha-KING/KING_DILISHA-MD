@@ -56,6 +56,6 @@
     "torrent-search-api": "latest",
     "webtorrent": "2.6.10",
     "nodejs-file-downloader": "^4.9.4",
-    "baiscopelk":"1.0.1"
+    "baiscopelk-api":"1.0.1"
   }
 }
