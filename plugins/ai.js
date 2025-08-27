@@ -4,11 +4,11 @@ const { cmd } = require("../command");
 
 let cache = {}; // temporary movie cache per user
 
+// SEARCH COMMAND
 cmd({
     pattern: "sinhalasub",
     desc: "Search SinhalaSub movies",
     category: "movie",
-    react: "🎬",
     filename: __filename
 }, async (bot, message, match, { from, reply }) => {
     try {
@@ -32,6 +32,9 @@ cmd({
         // Save cache for this user
         cache[from] = results.slice(0, 5);
 
+        // Auto-clear cache after 5 minutes
+        setTimeout(() => delete cache[from], 5 * 60 * 1000);
+
         // Send numbered list
         let txt = `🎬 *SinhalaSub Search Results for* _${match}_\n\n`;
         cache[from].forEach((res, i) => {
@@ -39,7 +42,10 @@ cmd({
         });
         txt += `\n📌 Reply with a number (1-${cache[from].length}) to get details.`;
 
-        await bot.sendMessage(from, { text: txt });
+        const sentMsg = await bot.sendMessage(from, { text: txt });
+
+        // Add reaction if bot supports it
+        if (bot.react) await bot.react(sentMsg.key, "🎬");
 
     } catch (e) {
         console.error(e);
@@ -47,7 +53,7 @@ cmd({
     }
 });
 
-// Handle number replies
+// HANDLE NUMBER REPLIES
 cmd({
     pattern: "^\\d+$",
     dontAddCommandList: true
@@ -62,22 +68,33 @@ cmd({
         const { data } = await axios.get(movie.link);
         const $ = cheerio.load(data);
 
-        const desc = $(".entry-content p").first().text().trim();
+        // Get first meaningful paragraph
+        let desc = "";
+        $(".entry-content p").each((i, el) => {
+            const text = $(el).text().trim();
+            if (text.length > 20 && !desc) desc = text;
+        });
+
+        // Get download links (filter common types)
         let downloads = [];
         $(".entry-content a").each((i, el) => {
             const btn = $(el).text().trim();
             const href = $(el).attr("href");
-            if (href && href.includes("http")) {
+            if (href && href.includes("http") && /download|drive|mega/i.test(btn)) {
                 downloads.push({ btn, href });
             }
         });
 
-        let txt = `🎬 *${movie.title}*\n\n📝 ${desc}\n\n📥 *Download Links:*\n`;
+        let txt = `🎬 *${movie.title}*\n\n📝 ${desc || "No description available."}\n\n📥 *Download Links:*\n`;
         downloads.forEach((d, i) => {
             txt += `${i + 1}. ${d.btn}\n🔗 ${d.href}\n\n`;
         });
 
-        await bot.sendMessage(from, { text: txt });
+        const sentMsg = await bot.sendMessage(from, { text: txt });
+
+        // React to message if supported
+        if (bot.react) await bot.react(sentMsg.key, "🎬");
+
         delete cache[from]; // clear cache after use
 
     } catch (e) {
