@@ -26,7 +26,6 @@
     "crypto-js": "latest",
     "file_size_url": "1.0.4",
     "fs-extra": "^11.1.0",
-    "pixaldrain-sinhalasub": "git+https://github.com/DarkMakerofc/pixaldrain-sinhalasub.git",
     "fs": "^0.0.1-security",
     "ffmpeg": "^0.0.4",
     "file-type": "^16.5.3",
